@@ -1,35 +1,40 @@
-<img src="https://raw.githubusercontent.com/zsylvester/meanderpy/755e95a8a87c82df6384694e0192fc8a02af4782/meanderpy_logo.svg" width="300">
 
 ## Description
 
-'meanderpy' is a Python module that implements a simple numerical model of meandering, the one described by Howard & Knutson in their 1984 paper ["Sufficient Conditions for River Meandering: A Simulation Approach"](https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/WR020i011p01659). This is a kinematic model that is based on computing migration rate as the weighted sum of upstream curvatures; flow velocity does not enter the equation. Curvature is transformed into a 'nominal migration rate' through multiplication with a migration rate (or erodibility) constant; in the  Howard & Knutson (1984) paper this is a nonlinear relationship based on field observations that suggested a complex link between curvature and migration rate. In the 'meanderpy' module we use a simple linear relationship between the nominal migration rate and curvature, as recent work using time-lapse satellite imagery suggests that high curvatures result in high migration rates ([Sylvester et al., 2019](https://doi.org/10.1130/G45608.1)).
 
-## Installation
+• We propose a semantic information feature fusion network (SIFFNet)  by incorporating semantic information and non-local self-similarity of DAS-VSP data.
 
-<code>pip install meanderpy</code>
+• We exploit the non-local self-similarity prior by improved lightweight attention module to effectively and efficiently recover weak seismic signal as well as global structure preservation.
+
+• Guided by semantic and self-similarity, SIFFNet thoroughly suppresses multi-type DAS-VSP noise and recover
+
 
 ## Requirements
 
-- numpy
+- python
 - matplotlib
-- scipy
-- PIL
-- numba
-- scikit-image
-- tqdm
-- jupyter
+- pytorch
+- einops
+- numpy
 
-## Usage
+## Instruction
 
-<img src="https://raw.githubusercontent.com/zsylvester/meanderpy/master/meanderpy_sketch.png" width="600">
+Training
 
-The sketch above shows the three 'meanderpy' components: channel, cutoff, channel belt. These are implemented as classes; a 'Channel' and a 'Cutoff' are defined by their width, depth, and x,y,z centerline coordinates, and a 'ChannelBelt' is a collection of channels and cutoffs. In addition, the 'ChannelBelt' object also has a 'cl_times' and a 'cutoff_times' attribute that specify the age of the channels and the cutoffs. This age is relative to the start time of the simulation (= the first channel, age = 0.0).
+Prepare your dataset in the required structure:
 
-To run the below cells, you must first import the library:
+Feature data: ../SIFFNet/data/feature_VSP/
 
-```python
-import meanderpy as mp
-import numpy as np
+Label data: ../SIFFNet/data/label_VSP/
+
+Mask data: ../SIFFNet/data/mask_VSP/
+
+Run the training script:
+
+
+
+```bash
+python train.py
 ```
 
 A reasonable set of input parameters are as follows:
