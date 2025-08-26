@@ -1,134 +1,147 @@
-## A Semantic Information Feature Fusion Network for Suppressing Diverse DAS-VSP Noise
+# SIFFNet 
+
+SIFFNet is a Python 3 software package designed for suppressing the complex noise in DAS-VSP seismic data.
+
+## Simple installation from pypi.org
+
+Install the Python libraries required for training the SIFFNet and testing the DAS-VSP denoising process
+
+`pip install -`
+
+  `pip install python3.9`
+
+  `pip install pytorch1.31.1`
+
+  `pip install matplotlib`
+
+  `pip install einops`
+
+  `pip install numpy`
+
+The above command should directly install all the dependencies required for the fully functional version of SIFFNet. You don't need to manually download anything.
 
 
-## Description
-In SIFFNet, a lightweight self-similar attention module is designed to efficiently extract non-local self-similarity through grid attention.  These  denoising network that leverages both hybrid attention mechanisms and multi-scale processing to recofeatures are fused with learned semantic information of DAS-VSP signals to guide the subsequent dual-branchnstruct local details and global morphology simultaneously. 
+## A simple example
+
+To illustrate how to denoise DAS-VSP data using SIFFNet, let's start with a simple example.
 
 
+### 1.Training(train.py)
 
-## Features
-• We propose a semantic information feature fusion network (SIFFNet)  by incorporating semantic information and non-local self-similarity of DAS-VSP data.
+First of all, the data loading module required for training must be imported.
 
-• We exploit the non-local self-similarity prior by improved lightweight attention module to effectively and efficiently recover weak seismic signal as well as global structure preservation.
+`from SIFFNet_main.utils.dataset_feature_label_segmentation import MyDataset`
 
-• Guided by semantic and self-similarity, SIFFNet thoroughly suppresses multi-type DAS-VSP noise and recover
+Next, load the SIFFNet denoising network.
 
+`from SIFFNet_main.model.SIFFNet import SIFFNet.`
 
-## Requirements
+The loaded data is divided into batch-x noisy data, batch-y clean labels, and batch-z semantic labels, and is provided to SIFFNet for supervised denoising training.
 
-- python
-- matplotlib
-- pytorch
-- einops
-- numpy
+### 2. Testing(denoise_test_real.py)
 
-## Project Structure
+First, import the DAS-VSP data.
 
-text
+`seismic_noise = np.load('/mnt/hd/zhangzeyuan1/yang/SIFFNet/Data/noise/noise.npy')`
 
+Load `from Cut_combine import cut`to trim the DAS-VSP seismic data into test blocks of size patch-size by patch-size.
 
-SIFFNet.py              # Main network architecture  
+`patch-size=160`
 
-CAMixing.py             # Channel Attention Mixing module
+Next, call the trained SIFFNet denoising model. The model path is:
 
-SIE.py                  # Segmentation network (UUNet)
+`model = torch.load('/mnt/hd/zhangzeyuan1/yang/SIFFNet/0.0015 0.0005/model_epoch20.pth')`
 
-segmentation_network.py # Alternative segmentation network
+Then, load the denoised test block with `from Cut_combine import combine` to restore it to the entire DAS-VSP seismic data.
 
-train.py                # Training script
+`seismic_predict = combine(predict_datas, patch_size, strides_x, strides_y, seismic_block_h, seismic_block_w)`
 
-denoise_test.py         # Denoising testing script
+The noise removal of the entire DAS-VSP seismic data is saved at:
 
-denoise_test_real.py    # Real data denoising script
+`np.save('/mnt/hd/zhangzeyuan1/yang/SIFFNet/Data/denoise9.npy', denoise_data)`
 
-losses.py               # Custom loss functions
+`denoise_data = seismic_noise-seismic_predict`
 
-Cut_combine.py          # Data patching and recombination utilities
+## Demo
+import numpy as np
+import matplotlib.pyplot as plt
+from Cut_combine import cut, combine
+import torch
+from scipy.io import savemat
 
-requirements.txt        # Python dependencies
-
-README.md               # This file
-
-## Instruction
-
-**Training**
-
-Prepare your dataset in the required structure:
-
-Feature data: ../SIFFNet/data/feature_VSP/
-
-Label data: ../SIFFNet/data/label_VSP/
-
-Mask data: ../SIFFNet/data/mask_VSP/
-
-Run the training script:
+### Load test DAS-VSP data
+seismic_noise = np.load('/mnt/hd/zhangzeyuan1/yang/SIFFNet/Data/noise/noise.npy')
+seismic_block_h, seismic_block_w = seismic_noise.shape
 
 
-```bash
-python train.py
-```
+### Crop the DAS-VSP test data
+patch_size = 160
+patches, strides_x, strides_y, fill_arr_h, fill_arr_w = cut(seismic_noise, patch_size, patch_size, patch_size)
+
+### Check if there is a GPU
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+### Load the trained SSIF denoising model
+model = torch.load('../model_epoch100.pth')
+model.to(device=device)  
+
+### Store test data patches
+predict_datas = []  
+
+### Perform denoising processing on the test data patches
+for patch in patches:
+    patch = np.array(patch)
+    print(patch.shape)
+    patch = patch.reshape(1, 1, patch.shape[0], patch.shape[1])
+    print(patch.shape)
+    patch = torch.from_numpy(patch)
+    patch = patch.to(device=device, dtype=torch.float32) 
+    predict_data = model(patch) 
+    predict_data = predict_data[1].detach().cpu().numpy() 
+    print(predict_data.shape)
+    predict_data = predict_data.squeeze() 
+    print(predict_data.shape)
+    predict_datas.append(predict_data)
+
+### Restore the denoised test data patches to the entire DAS-VSP
+seismic_noise_predict = combine(predict_datas, patch_size, strides_x, strides_y, seismic_block_h, seismic_block_w)
+
+seismic_denoised=seismic_noise-seismic_noise_predict
+
+### DAS-VSP denoised result display
+
+plt.figure(figsize=(12, 5))  
+
+### Left subgraph: Noisy DAS-VSP data
+plt.subplot(1, 2, 1)
+plt.imshow(seismic_noise, cmap='seismic', aspect='auto', 
+           vmin=-np.max(np.abs(seismic_noise))*0.5, 
+           vmax=np.max(np.abs(seismic_noise))*0.5)
+plt.title('Noisy DAS-VSP Data')
+plt.xlabel('Trace Number')
+plt.ylabel('Time Sample')
+plt.colorbar(label='Amplitude')
+
+### Right subimage: Denoised result
+plt.subplot(1, 2, 2)
+plt.imshow(seismic_denoised, cmap='seismic', aspect='auto', 
+           vmin=-np.max(np.abs(seismic_denoised))*0.5, 
+           vmax=np.max(np.abs(seismic_denoised))*0.5)
+plt.title('Denoised DAS-VSP Data')
+plt.xlabel('Trace Number')
+plt.ylabel('Time Sample')
+plt.colorbar(label='Amplitude')
+
+plt.tight_layout()  
+plt.show()
+
+![含噪数据与去噪结果对比](./images/denoising_comparison.png)
+
+**图1：DAS-VSP数据去噪效果对比**
+*左侧：原始含噪数据 | 右侧：SIFFNet去噪结果*
+
+## Dataset
+
+The noise in this experiment comes from the real DAS-VSP seismic records. It is confidential data and cannot be made public.
 
 
-**Training Output:**
-
--   Model checkpoints saved at each epoch (e.g., `model_epoch1.pth`, `model_epoch2.pth`, etc.)
-    
--   Training and validation loss values printed to console
-    
--   Loss plot saved as `loss_plot_VSP.png`
-    
--   Loss values saved to `loss_sets_VSP.txt`
-
-
-### Testing
-
-
-**Synthetic data testing**
-Synthetic data testing requires two input files:
-
--   **Clean signal**: `clean_normal.npy` 
-    
--   **Real noise data**: `noise.npy`
-    
-
-For synthetic data testing:
-```bash
-
-python denoise_test.py
-```
-
-**Synthetic Test Output:**
-
--   Denoised data saved as `denoise.npy` and `denoise.mat`
-    
--   Predicted noise component saved as `predict.npy` and `predict.mat`
-    
--   Difference map (denoised vs clean) saved as `chatu.npy` and `chatu.mat`
-    
--   Original clean data saved as `seismic.npy` and `seismic.mat`
-    
--   Noisy input data saved as `seismic_noise.npy` and `seismic_noise.mat`
-
-
-
-**real data testing**
-For real data testing:
-
-```bash
-python denoise_test_real.py
-```
-**Real Test Input:**
-
--   MATLAB format seismic data file (.mat)
-    
--   Data should be contained in the 'data' variable of the mat file
-    
-    
-
-**Real Test Output:**
-
--   Segmentation results saved as `chatu.npy` and `chatu.mat`
-    
--   Processed seismic data with noise removed
-    
--   Binary segmentation mask 
