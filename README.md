@@ -140,7 +140,7 @@ plt.colorbar(label='Amplitude')
 plt.tight_layout()  
 plt.show()
 
-![Comparison of noisy data and denoised results](./images/denoising_comparison.png)
+![Comparison of noisy data and denoised results](https://github.com/yangqingchen2024/SIFFNet/blob/main/SIFFNet/Noisy%20and%20denoised%20images.png)
 
 **Figure 1: Comparison of Denoising Effects of DAS-VSP Data**
 *Left side: Original noisy data | Right side: SIFFNet denoising result*
