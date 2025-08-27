@@ -42,7 +42,7 @@ The loaded data is divided into batch-x noisy data, batch-y clean labels, and ba
 
 First, import the DAS-VSP data.
 
-`seismic_noise = np.load('/mnt/hd/zhangzeyuan1/yang/SIFFNet/Data/noise/noise.npy')`
+`seismic_noise = np.load('../noisy.npy')`
 
 Load `from Cut_combine import cut`to trim the DAS-VSP seismic data into test blocks of size patch-size by patch-size.
 
@@ -50,7 +50,7 @@ Load `from Cut_combine import cut`to trim the DAS-VSP seismic data into test blo
 
 Next, call the trained SIFFNet denoising model. The model path is:
 
-`model = torch.load('/mnt/hd/zhangzeyuan1/yang/SIFFNet/0.0015 0.0005/model_epoch20.pth')`
+`model = torch.load('。。/model_epoch30.pth')`
 
 Then, load the denoised test block with `from Cut_combine import combine` to restore it to the entire DAS-VSP seismic data.
 
@@ -70,7 +70,7 @@ import torch
 from scipy.io import savemat
 
 ### Load test DAS-VSP data
-seismic_noise = np.load('/mnt/hd/zhangzeyuan1/yang/SIFFNet/Data/noise/noise.npy')
+seismic_noise = np.load('..data/noisy.npy')
 seismic_block_h, seismic_block_w = seismic_noise.shape
 
 
@@ -82,7 +82,7 @@ patches, strides_x, strides_y, fill_arr_h, fill_arr_w = cut(seismic_noise, patch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ### Load the trained SSIF denoising model
-model = torch.load('../model_epoch100.pth')
+model = torch.load('..model/model_epoch30.pth')
 model.to(device=device)  
 
 ### Store test data patches
