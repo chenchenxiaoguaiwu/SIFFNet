@@ -1,6 +1,6 @@
 # SIFFNet 
 
-SIFFNet is a Python 3 software package designed for suppressing the complex noise in DAS-VSP seismic data.
+SIFFNet is a network model based on Python 3.9, designed to remove the complex noise of DAS-VSP.
 
 ## Simple installation from pypi.org
 
@@ -61,6 +61,11 @@ The noise removal of the entire DAS-VSP seismic data is saved at:
 `np.save('/mnt/hd/zhangzeyuan1/yang/SIFFNet/Data/denoise9.npy', denoise_data)`
 
 `denoise_data = seismic_noise-seismic_predict`
+
+## Download trained SIFFNet and DAS-VSP noisy data
+
+The trained model and Data are available for Google Drive. To ensure proper access and usage, please follow these steps:
+Click on the Google Drive link.[Google Drive](https://drive.google.com/drive/folders/1JfO6M9vVnOCb0VUHeephwKo0UPqxsuwy?usp=sharing).
 
 ## Demo
 import numpy as np
@@ -135,10 +140,10 @@ plt.colorbar(label='Amplitude')
 plt.tight_layout()  
 plt.show()
 
-![含噪数据与去噪结果对比](./images/denoising_comparison.png)
+![Comparison of noisy data and denoised results](./images/denoising_comparison.png)
 
-**图1：DAS-VSP数据去噪效果对比**
-*左侧：原始含噪数据 | 右侧：SIFFNet去噪结果*
+**Figure 1: Comparison of Denoising Effects of DAS-VSP Data**
+*Left side: Original noisy data | Right side: SIFFNet denoising result*
 
 ## Dataset
 
