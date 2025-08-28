@@ -50,7 +50,7 @@ Load `from Cut_combine import cut`to trim the DAS-VSP seismic data into test blo
 
 Next, call the trained SIFFNet denoising model. The model path is:
 
-`model = torch.load('。。/model_epoch30.pth')`
+`model = torch.load('../model_epoch30.pth')`
 
 Then, load the denoised test block with `from Cut_combine import combine` to restore it to the entire DAS-VSP seismic data.
 
@@ -58,7 +58,7 @@ Then, load the denoised test block with `from Cut_combine import combine` to res
 
 The noise removal of the entire DAS-VSP seismic data is saved at:
 
-`np.save('/mnt/hd/zhangzeyuan1/yang/SIFFNet/Data/denoise9.npy', denoise_data)`
+`np.save('../data/denoise.npy', denoise_data)`
 
 `denoise_data = seismic_noise-seismic_predict`
 
