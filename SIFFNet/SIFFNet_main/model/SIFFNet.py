@@ -100,7 +100,7 @@ class SSBlock(SSBlockNaive):
         # embed by wqk
         qk = rearrange(xx, 'b c h w -> (b h w) c')
         v = rearrange(v, 'b c h w -> (b h w) c')
-        qk = torch.mm(qk, self.wqk)##矩阵乘法
+        qk = torch.mm(qk, self.wqk)
 
         # process per image
         qk = rearrange(qk, '(b h w) k -> b (h w) k', b=b, h=sh, w=sw)
@@ -426,4 +426,5 @@ if __name__ == "__main__":
     model = SIFFNet()
     input_tensor = torch.randn(1, 1, 160 ,160)
     output_tensor = model(input_tensor)
+
     print(output_tensor[0].shape)
